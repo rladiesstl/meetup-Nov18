@@ -19,7 +19,7 @@ options(htmltools.dir.version = FALSE)
 
 - Started in San Francisco in 2012  
 
-- Currently has **134 Meetup groups in 134 cities and 44 countries for a total of 35,825** members globally  
+- Currently has Meetup groups in **134 cities in 44 countries for a total of 35,825** members globally  
 <center>
 ![](https://rladies.org/wp-content/uploads/2018/02/R-Ladies.png)
 
@@ -64,7 +64,7 @@ options(htmltools.dir.version = FALSE)
 
 - (October 3) Reproducible research with R with Dr. Bobbi Carothers 
 
-- (November 14) Plotting something great: Making Graphs in R with Shelly Cooper 
+- (November 14) Plotting something great: Making graphs in R with Shelly Cooper 
 
 - (February 9) <a href="https://www.meetup.com/R-Ladies-St-Louis/events/254883901/">Git going with GitHub</a> with Laura Gardner 
 
