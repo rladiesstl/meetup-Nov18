@@ -1,0 +1,105 @@
+---
+title: "Prepping for Plotting"
+author: "Shelly Cooper"
+date: "11/14/2018"
+output: html_notebook
+---
+
+# Setup
+Let's first make sure that the packages are loaded and data is in the global environment
+```{r setup}
+#install.packages("tidyverse") - only do if it's not already installed
+library(tidyverse)
+
+# CHANGE YOUR WORKING DIRECTORY TO MATCH WHERE THE FILE IS LOCATED
+# Here, my csv is located on my desktop. You might need to change this to
+# Downloads or some other directory (folder). 
+workshop <- read.csv("~/Desktop/workshop.csv")
+
+#Since we're also working with the `iris` dataset, let's make sure that's ready
+iris <- iris
+
+```
+
+#Summarize
+```{r summarize}
+iris %>%
+  summarize(meanSepLength = mean(Sepal.Length))
+
+iris %>%
+  summarize(meanSepLength = mean(Sepal.Length),
+            sdSepLength = sd(Sepal.Length),
+            CrazyVariableName = mean(Petal.Width))
+
+```
+
+# Group By
+```{r groupBy}
+iris %>%
+  group_by(Species) %>%
+  summarize(meanSepLength = mean(Sepal.Length),
+            meanPetalLength = mean(Petal.Length))
+```
+
+# Spread
+Going from LONG to WIDE format
+```{r spread}
+workshop2 <- workshop %>%
+  spread(key = TimePoint, value = Happiness)
+
+# Note how this is stored as a new object called workshop2!
+```
+
+# Gather
+Going from WIDE to LONG
+```{r gather}
+
+# Notice why the following code is WRONG!
+workshop3 <- workshop2 %>%
+  gather(key = Time, value = Measurement)
+
+# You need a way to say "hey, don't gather the Subject". We can use 
+# a `-` to do that. The CORRECT code is:
+workshop3 <- workshop2 %>%
+  gather(key = Time, value = Measurement, -Subject)
+
+```
+
+# Mutate
+See help documentation for `transmutate` also. See slides for more details.
+```{r mutate}
+# For adding a new variable:
+workshop3 %>%
+  mutate(Msq = Measurement^2)
+
+# Now you have a new variable called "Msq" at the very end of the data.frame
+# that is the squared value of the Measurement 
+
+# I personally like `mutate` for changing classes of objects. For example,
+# to go from character to factor:
+workshop4 <- workshop3 %>%
+  mutate_at(vars(2), funs(factor))
+
+# You can pipe multiple things!!
+ws5 <- workshop2 %>%
+  gather(key = Time, value = Measurement, -Subject) %>%
+  mutate_at(vars(2), funs(factor))
+```
+
+# Separate
+```{r sep}
+workshop %>%
+  separate(col= TimePoint, into = c("Label", "Time"), sep = 4) %>%
+  select(-Label) %>%
+  group_by(Time) %>%
+  summarize(meanHappiness = mean(Happiness), sdHappiness = sd(Happiness))
+
+# line 1 feeds in the workshop df
+# line 2 separates each TimePoint on the 4th character, and splits it
+# into 2 new columns called "Label" and "Time"
+# line 3 removes the "Label" column
+# line 4 groups by Time so that we can get summary stats for each time point
+# line 5 actually gets those summary stats
+
+```
+

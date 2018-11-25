@@ -1,0 +1,545 @@
+---
+title: "Plotting Something Great"
+author: "Shelly Cooper"
+date: "11/14/2018"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+iris = iris
+```
+
+## Review of Core Concepts
+
+#### Basic Scatterplot
+```{r basic}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Scatterplot of Sepal Width by Height")
+```
+
+#### Changing Aesthetics
+Compare the code for the following 2 plots, and notice the differences.
+
+What happens to the size of the plots and why? 
+
+```{r aes}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(color = "purple", shape = 3) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Changing AES: Plot 1")
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, size = Species), 
+             alpha = .5) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Changing AES: Plot 2")
+```
+
+## Faceting
+Faceting lets you break up your plot into multiple sub-plots. There are two types: `facet_grid` and `facet_wrap`. Within each, read the **~** as "by".
+
+#### `facet_grid`
+Especially great when you have multiple factors to separate on. If you want to change the x- and y-axes so that they best fit the data (rather than keep them the exact same across subplots), use the `scales` argument (see Plot 2 below).
+
+```{r fgrid1}
+# Plot 1 = 1 variable to separate on, keep the axes the same 
+# for each sub-plot
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Grid: Plot 1") +
+  facet_grid(~ Species)
+
+# Plot 2 = 1 variable to separate on, let the x-axis change based
+# on the actual data
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Grid: Plot 2") +
+  facet_grid(~ Species, scales = "free_x")
+
+```
+
+Now let's see what happens when you facet based on 2 different factor variables. To do this, I'm going to create a new categorical variable, just for demonstrating this. 
+
+```{r fgrid2}
+#BUT FIRST -- WHAT HAPPENS WHEN PLOTTING IS NOT A FACTOR??
+
+time <- c(rep("0", times = 25), rep("1", times = 25))
+iris["time"] <- rep(time, times = 3)
+iris$time = as.numeric(iris$time)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = time))
+
+# try again, now with words and as factors
+
+time <- c(rep("early", times = 25), rep("late", times = 25))
+iris["time"] <- rep(time, times = 3)
+iris$time <- factor(iris$time)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = time))
+
+######################################
+
+# Plot 3 = 2 variables to separate on, keep the axes the same 
+# for each sub-plot
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Grid: Plot 3") +
+  facet_grid(time ~ Species)
+
+# Plot 4 = 2 variables to separate on, keep the axes the same 
+# for each sub-plot
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Grid: Plot 4") +
+  facet_grid(Species ~ time)
+```
+
+#### `facet_wrap`
+This basically creates a ribbon that will just continue on to the next row when ready. 
+
+```{r fwrap}
+# Plot 1 = 1 variable to separate on, use default rows/columns
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Wrap: Plot 1") +
+  facet_wrap(~ Species)
+
+# Plot 2 = 1 variable to separate on, change number of 
+# colunms of plots
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Wrap: Plot 2") +
+  facet_wrap(~ Species, ncol = 1)
+
+# Plot 3 = 2 variables to separate on
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Wrap: Plot 3") +
+  facet_wrap(~ Species + time, ncol = 4)
+```
+
+## Manually Changing Things
+There are many ways to change something within `ggplot2`. Below is just a selection of ones used frequently. To find exact values, Google!
+
+```{r manual}
+# Shapes
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Facet_Wrap: Plot 3") +
+  scale_shape_manual(values = c(9,10,11)) +
+  facet_wrap(~ Species + time)
+
+# Set Colors vis HEX codes
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "New Colors") +
+  scale_color_manual(values = c("#5cd65c", "maroon", "#0047b3")) +
+  facet_wrap(~ Species + time)
+
+# Make all colors various shades of GREY for black/white printing
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "All Grey") +
+  scale_color_grey(start = 0, end = 0.8, 
+                   labels = c("setosa", "versicolor", "virginica")) +
+  facet_wrap(~ Species + time)
+```
+
+## Color Palettes
+These are useful when you have a TON of data and want to maximize differences between colors (or you want to use colors that are colorblind friendly). I use RColorBrewer usually.
+
+```{r palette}
+#install.packages(RColorBrewer)  # only do if you don't have this
+library(RColorBrewer)
+
+# Find the Palette that you like
+display.brewer.all(n = 3, type = "qual")
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Color Brewer") +
+  scale_color_brewer(palette = "Dark2") +
+  facet_wrap(~ Species + time)
+```
+There are TONS of color palletes. Some are great, some are kinda ridiculous. For example, there are Wes Anderson themed palette! To view them, click [here](https://github.com/karthik/wesanderson#wes-anderson-palettes).
+```{r wes}
+#install.packages("wesanderson") only do once
+library(wesanderson)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Wes Anderson", subtitle = "The Royal Tenenbaums") +
+  scale_color_manual(values = wes_palette("Royal1")) +
+  facet_wrap(~ Species + time)
+```
+
+## Themes
+Themes are great when you want to change the entire aesthetic of your plot. I recommend the `ggthemes` package. 
+
+```{r them1}
+#install.packages("ggthemes") only do once
+library(ggthemes)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Black and White") +
+  facet_wrap(~ Species + time) +
+  theme_bw()
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Black and White",
+       subtitle = "different base size") +
+  facet_wrap(~ Species + time) +
+  theme_bw(base_size = 7)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Nate Silver's 538 Theme") +
+  facet_wrap(~ Species + time) +
+  theme_fivethirtyeight()
+
+```
+
+What if you like a theme, but you still want to make changes? For exmaple, let's say you like the black and white theme, but you want to get rid of the gray grid lines. Also, you want to get rid of the title of your legend box. You can go into `theme` itself and change literally anything. This gives you a ridiculous amount of flexibility, but it can be daunting!
+
+```{r theme2, message=FALSE}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Black and White", subtitle = "No Gridlines") +
+  facet_wrap(~ Species + time) +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA))
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Black and White", 
+       subtitle = "No Gridlines and No Legend Title") +
+  facet_wrap(~ Species + time) +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA),
+        legend.title = element_blank())
+
+# for fonts when you want to print to a PDF
+library(extrafont)
+#font_import() import all of your fonts, only need to do this once
+#fonts() get a list of the fonts
+#fonttable() useful table listing of the family name, font name, etc.
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Black and White", 
+       subtitle = "The Weirdest Plot Ever") +
+  facet_wrap(~ Species + time) +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA),
+        legend.title = element_blank(),
+        axis.title = element_text(color = "magenta", 
+                                  family = "Comic Sans MS"),
+        legend.background = element_rect(fill = "gray"))
+```
+
+## Text in Plots
+Sometimes you need to have some text. First we'll add text that is relevant to the data, then we can add in free text.
+
+```{r text1}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_text(aes(label = Species, color = Species), 
+            show.legend = FALSE) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Text Plot 1") +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA))
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_text(aes(label = Species, color = Species), 
+            show.legend = FALSE, check_overlap = TRUE) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Text Plot 2", subtitle = "No Overlap") +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA))
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species)) +
+  geom_text(aes(label = Species, color = Species), 
+            show.legend = FALSE, check_overlap = TRUE, 
+            vjust = -1, size = 2) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Text Plot 3") +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA),
+        plot.title = element_text(hjust = .5))
+```
+
+
+Now let's say you want to add a r-squared value to the bottom right corner of your plot. Use `annotate`. You need to tell ggplot the x and y coordinates of your new text!
+
+
+```{r text2}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) +
+  annotate("text", x = 7.5, y = 2.3, 
+           label = "R^2 = .666", color = "red") + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Text Plot 4") +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA),
+        plot.title = element_text(hjust = .5))
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species, shape = Species)) +
+  annotate("text", x = 7.5, y = 2.3, 
+           label = "italic(R) ^ 2 == .666", color = "red",
+           size = 3, parse = TRUE) + 
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Text Plot 5") +
+  theme_bw() +
+  theme(panel.grid.major =  element_line(colour = NA),
+        panel.grid.minor =  element_line(colour = NA),
+        plot.title = element_text(hjust = .5))
+
+```
+
+## Arranging Multiple Plots
+Let's say you have 3 different, independent plots (not subplots) that you want to arrange in to a cohesive figure. You're arranging a grid of plots. The required packages is `gridExtra`. Importantly, you need to STORE these plots to your environment first (which means it won't immediately appear when you run the code). Then you can arrange the plots based on the name you assigned it.
+
+```{r grid, message=FALSE}
+#install.packages(gridExtra)
+library(gridExtra)
+
+# Histogram of Sepal Lengths, separated by Species
+p1<-ggplot(data = iris, aes(x = Sepal.Length, fill=Species)) +
+  geom_histogram(binwidth = .1) +
+  labs(xlab = "Sepal Length (cm)", ylab ="Count",
+       title = "Histogram of Sepal Length") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=10, face = "bold", hjust = 1))
+
+# Boxplots of Sepal Length, separated by Species
+p2<-ggplot(data = iris, aes(x = Species, y = Sepal.Length, fill=Species)) +
+  geom_boxplot() +
+  labs(xlab = "Species", ylab = "Sepal Length",
+       title = "Boxplot of Sepal Length") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=10, face = "bold", hjust = 1))
+
+# Violin plot of Sepal Length, separated by species
+p3<-ggplot(data = iris, aes(x = Species, y = Sepal.Length, fill=Species)) +
+  geom_violin(alpha=.25, color="gray") +
+  coord_flip() +
+  labs(xlab = "Species", ylab = "Sepal Length",
+       title = "Violin plot of Sepal Length by Species") +
+  theme_minimal() +
+  theme(plot.title = element_text(size=10, face = "bold", hjust = 1))
+  
+# Creating a matrix that defines the layout (not all graphs need to take up the same space)
+layoutGrid <- rbind(c(1,2),
+             c(3,3))
+
+# Plotting the plots on a grid
+grid.arrange(p1, p2, p3, ncol=2, layout_matrix=layoutGrid)
+```
+
+## Plotting Lines: Horizontal, Vertical, and Regressions
+
+Horizontal & Vertical
+
+```{r horizVert}
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species)) + 
+  geom_vline(xintercept = 6.5, color = "red") +
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Lines 1")
+
+# What if you want it by each group?
+# Need to make/store that data somewhere, and then call it
+
+newData = iris %>%
+  group_by(Species) %>%
+  summarize(xint = mean(Sepal.Length))
+
+
+ggplot() +
+  geom_point(data = iris,
+             aes(x = Sepal.Length, y = Sepal.Width,
+                 color = Species)) + 
+  geom_vline(aes(xintercept = newData$xint,
+                 color = newData$Species)) +
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Lines 2")
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(aes(color = Species)) + 
+  geom_hline(yintercept = 3, color = "tomato4",
+             linetype = "dashed") +
+  labs(xlab = "Sepal Length (cm)", ylab = "Sepal Width (cm)",
+       title = "Lines 3")
+
+```
+
+
+For simple linear regression, you only need to add `geom_smooth`
+
+```{r reg1}
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Regression Plot 1a", subtitle = "Simple Linear",
+       x = "Sepal Length", y = "Sepal Width")
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Regression Plot 1b", subtitle = "Simple Linear",
+       x = "Sepal Length", y = "Sepal Width")
+
+model1 = lm(Sepal.Width ~ Sepal.Length, data = iris)
+
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  geom_abline(intercept = coef(model1)[[1]], 
+              slope = coef(model1)[[2]]) +
+  labs(title = "Regression Plot 1b",
+       x = "Sepal Length", y = "Sepal Width")
+
+library(broom)
+model1Fitted = augment(model1)
+
+ggplot(data = model1Fitted, aes(x = .fitted, y = .resid))+
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Test of Homoskedasticity", 
+       x = "Fitted (Predicted) Values",
+       y = "Residuals")
+
+
+```
+
+## Error bars
+
+Error bars *can* sometimes be annoying, but most of the time it's OK.
+
+```{r, errorBars, warning=FALSE}
+
+# first, let's make the data!!
+
+summaryStats = iris %>%
+  group_by(Species, time) %>%
+  summarize(means = mean(Sepal.Length),
+            sds = sd(Sepal.Width)) %>%
+  mutate(sdLower = means - sds) %>%
+  mutate(sdUpper = means + sds)
+
+# now, let's plot!  
+
+ggplot(data = summaryStats, aes(x = Species, y = means,
+                                fill = Species, alpha = time)) +
+  geom_col(position = position_dodge(width=.9)) +
+  geom_errorbar(aes(ymin = sdLower, ymax = sdUpper),
+                position = position_dodge(width=.9),
+                width = .2) +
+  theme_bw() +
+  theme(panel.grid = element_line(color = NA)) +
+  scale_alpha_discrete(range = c(.5, 1)) +
+  labs(title = "Error Bars", x = "", y = "Mean")
+  
+```
+
+
+
+## Jittering & Layers
+
+![](/Users/Coop/Downloads/image003.png)
+
+
+I was sent a snapshot of this plot, and asked to replicate it. The following code generates some fake data, and makes a very similar plot. It's important to keep track of all your layers! In the plot below:
+
+- Layer 1 = geom_jitter changes the x coordinate of each data point so that it is more aligned to the categorical variable you want
+- Layer 2 = geom_col makes the bar plots (note that this calls upon a different data.frame)
+- Layer 3 = error bars
+- Layer 4 = labels for x axis, y axis, and title. 
+
+```{r jitterlayers, message=FALSE}
+
+# Step 1: Make Fake Data
+set.seed(500) # this makes sure that you generate the same fake data
+
+change1 <- runif(n = 10, min = 0, max = 1)
+change2 <- runif(n = 10, min = 1.5, max = 4)
+change <- c(change1, change2)
+
+np <- rep("NP", times = 10)
+p <- rep("P", times = 10)
+category <- c(np, p)
+
+df1 <- data.frame(Category = category,
+                  Change = change)
+
+# Step 2: Summarize Fake Data
+# This allows you to get the error bars and columns later on
+# IMO, storing this as a second data.frame is easier
+
+df2 <- df1 %>%
+  group_by(Category) %>%
+  summarise(meanChange = mean(Change),
+            sdChange = sd(Change))
+df2["sdLower"] <- df2$meanChange - df2$sdChange
+df2["sdUpper"] <- df2$meanChange + df2$sdChange
+
+# Step 3: Plot
+ggplot() +
+  geom_jitter(data = df1, 
+              aes(x = Category, y = Change, 
+                  color = Category, shape = Category)) +
+  # if you want it to be taller, you can set the y axis
+  # coord_cartesian(ylim = c(0, 5))  
+  geom_col(data = df2,
+           aes(x = Category, y = meanChange), 
+           fill = NA, color = "black") +
+  geom_errorbar(data = df2,
+                aes(x = Category, ymin = sdLower, ymax = sdUpper),
+                width = .25) +
+  labs(x = "", # this gets rid of the 'Category' label on x-axis
+       y = "Daily Change in Period (h)",
+       title = "Intense Example of Jittering and Layers") +
+  theme_bw() +
+  theme(panel.grid.major = element_line(color = NA),
+        panel.grid.minor = element_line(color = NA),
+        legend.position = c(.1, .8))
+
+```
+
